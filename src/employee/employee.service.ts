@@ -62,7 +62,6 @@ else{
     let name=updateEmployeeDto.firstName+" "+updateEmployeeDto.lastName;
     let code=id+1;
     let codeString=String(code);
-    let dateofbirth = new Date(updateEmployeeDto.dob);
     let update_object= {
       id:id,
       name:name,
@@ -70,7 +69,7 @@ else{
       employeeCode:codeString,
       aadharNumber:updateEmployeeDto.aadharNumber,
       gender:updateEmployeeDto.gender,
-      dob:dateofbirth,
+      dob:updateEmployeeDto.dob,
       bloodGroup:updateEmployeeDto.bloodGroup,
       sslcScore:updateEmployeeDto.sslcScore,
       hscScore:updateEmployeeDto.hscScore,
@@ -89,7 +88,6 @@ else{
       else{
         update_object.currentStatus="incomplete"
       }
-      console.log(update_object);
       let data= await this.employeeRepository.save(update_object);
 
    

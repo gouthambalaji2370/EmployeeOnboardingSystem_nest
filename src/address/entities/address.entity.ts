@@ -34,7 +34,7 @@ export class Address {
     @Column()
     mapCoordinates:string;
 
-    @ManyToOne(type => Employee, (employee) => employee.id)
+    @ManyToOne(type => Employee, (employee) => employee.id,{orphanedRowAction:'delete'})
     @JoinColumn({name:"employee_id",referencedColumnName: 'id'})
     employee: Employee;
 

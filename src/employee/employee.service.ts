@@ -7,8 +7,8 @@ import { UpdateEmployeeDto } from './dto/update-employee.dto';
 import { UpdateStatusDto } from './dto/update-status.dto';
 import { EmployeeRepository } from './employee.repository';
 import { MailService } from 'src/mail/mail.service';
-import { Employee } from './entities/employee.entity';
-
+import axios from 'axios';
+import { ForwardEmployeeDto } from './dto/forward-employee-dto';
 @Injectable()
 export class EmployeeService {
  
@@ -17,18 +17,17 @@ export class EmployeeService {
     private roleRepository:RoleRepository,
     private userRepository:UserRepository,
     private addressRepository:AddressRepository,
-    private mailService:MailService
+    private mailService:MailService,
   ){
 
   }
  async create(createEmployeeDto: CreateEmployeeDto) {
   let dateTime = new Date()
-  console.log(createEmployeeDto);
-   let data = await this.employeeRepository.save({name:createEmployeeDto.name,emailId:createEmployeeDto.emailId,created_at:dateTime});
-   let role= await this.roleRepository.findOne(createEmployeeDto.roleid);
+  let data = await this.employeeRepository.save({name:createEmployeeDto.name,emailId:createEmployeeDto.emailId,created_at:dateTime});
+  
+  let role= await this.roleRepository.findOne(createEmployeeDto.roleid);
   let user=await this.userRepository.save({email:createEmployeeDto.emailId,password:createEmployeeDto.password,role:role,employee:data});
-  console.log(user);
-    if( data!==null && user!==null){
+    if(data!==null && user!==null){
     return data;
   }
 else{
@@ -56,7 +55,36 @@ else{
     let employee=await this.employeeRepository.findOne({where: {id: id}, relations: ['addressSet']})
     if(updateStatusDto.action==='approve'){
       employee.currentStatus='COMPLETED'
-      await this.mailService.sendNotification(employee,'approve');
+      let user= await this.userRepository.findOne({where:{employee:employee},relations:['role']});
+      let requestData= new ForwardEmployeeDto();
+      requestData.name=employee.name;
+      requestData.emailId=employee.emailId;
+      requestData.phoneNumber=employee.phoneNumber;
+      requestData.fatherName=employee.fatherName;
+      requestData.motherName=employee.motherName;
+      requestData.employeeCode=employee.employeeCode;
+      requestData.emergencyContactName=employee.emergencyContactName;
+      requestData.emergencyContactRelation=employee.emergencyContactRelation;
+      requestData.emergencyContactNumber=employee.emergencyContactNumber;
+      requestData.aadharNumber=employee.aadharNumber;
+      requestData.gender=employee.gender;
+      requestData.addressSet=employee.addressSet;
+      requestData.bloodGroup=employee.bloodGroup;
+      requestData.dob=employee.dob;
+      requestData.gender=requestData.gender;
+      requestData.role=user.role.role_name;
+      requestData.sslcScore=employee.sslcScore;
+      requestData.ugScore=employee.ugScore;
+      requestData.hscScore=employee.hscScore;
+      axios.post("http://localhost:9252/employee",requestData).then((res)=>{
+        if(res.data.success){
+          employee.currentStatus='COMPLETED'
+          this.mailService.sendNotification(employee,'approve');
+
+        }
+      }).catch((e)=>{
+        console.log(e);
+      });
     }
     else if(updateStatusDto.action==='reject'){
       employee.currentStatus='REJECTED'
@@ -67,10 +95,12 @@ else{
     return {'success':true,message:'Employee Status updated Successfully'};
 
   }
+ 
   async update(id: number, updateEmployeeDto: UpdateEmployeeDto) {
     let name=updateEmployeeDto.firstName+" "+updateEmployeeDto.lastName;
     let code=id+1;
     let codeString=String(code);
+    let employee=await this.employeeRepository.findOne(id);
     let update_object= {
       id:id,
       name:name,
@@ -88,18 +118,21 @@ else{
       emergencyContactRelation:updateEmployeeDto.emergencyContactRelation,
       emergencyContactName:updateEmployeeDto.emergencyContactName,
       emergencyContactNumber:updateEmployeeDto.emergencyContactNumber,
-      addressSet:updateEmployeeDto.addressSet,
       rejectReason:null,
-      currentStatus:""}
-      if(updateEmployeeDto.action==="submit"){
-        update_object.currentStatus="pending"
-      }
-      else{
-        update_object.currentStatus="incomplete"
-      }
-      let data= await this.employeeRepository.save(update_object);
-    let address1=  await this.addressRepository.save({type:updateEmployeeDto.addressSet[0].type,flatName:updateEmployeeDto.addressSet[0].flatName,street:updateEmployeeDto.addressSet[0].street,district:updateEmployeeDto.addressSet[0].district, area:updateEmployeeDto.addressSet[0].area,state:updateEmployeeDto.addressSet[0].state,country:updateEmployeeDto.addressSet[0].country,pincode:updateEmployeeDto.addressSet[0].pincode,mapCoordinates:updateEmployeeDto.addressSet[0].mapCoordinates,employee:data})
-    let address2=  await this.addressRepository.save({type:updateEmployeeDto.addressSet[1].type,flatName:updateEmployeeDto.addressSet[1].flatName,street:updateEmployeeDto.addressSet[1].street,district:updateEmployeeDto.addressSet[1].district, area:updateEmployeeDto.addressSet[1].area,state:updateEmployeeDto.addressSet[1].state,country:updateEmployeeDto.addressSet[1].country,pincode:updateEmployeeDto.addressSet[1].pincode,mapCoordinates:updateEmployeeDto.addressSet[1].mapCoordinates,employee:data})
+      addressSet:updateEmployeeDto.addressSet,
+      currentStatus:""
+    }
+    if(updateEmployeeDto.action==="submit"){
+      update_object.currentStatus="pending"
+        }
+        else{
+          update_object.currentStatus="incomplete"
+        }
+        let data= await this.employeeRepository.save(update_object);
+    
+
+        
+    
     return {'success':true,message:'Employee updated Successfully'};
   }
 

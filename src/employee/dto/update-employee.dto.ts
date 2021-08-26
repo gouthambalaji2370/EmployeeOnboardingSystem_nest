@@ -1,7 +1,7 @@
 import { Address } from 'src/address/entities/address.entity';
-import { IsEmail, IsNotEmpty,IsNotEmptyObject, Matches } from 'class-validator';
+import {IsDate, IsNotEmpty} from 'class-validator';
+import { Type } from 'class-transformer';
 
-const boolRegex = /^[2-9][0-9]{11}$/;
 export class UpdateEmployeeDto {
   
     @IsNotEmpty()
@@ -17,12 +17,6 @@ export class UpdateEmployeeDto {
     readonly phoneNumber:string;
 
     @IsNotEmpty()
-    readonly employeeCode:string;
-
-    @IsNotEmpty()
-    @Matches(boolRegex,{
-        message:`enter a valid aadhar number`
-      })
     readonly aadharNumber:string;
 
     @IsNotEmpty()
@@ -32,7 +26,7 @@ export class UpdateEmployeeDto {
     readonly bloodGroup:string;
 
     @IsNotEmpty()
-    readonly dob:Date;
+    readonly dob:string;
 
     @IsNotEmpty()
     readonly sslcScore:number;
@@ -58,12 +52,7 @@ export class UpdateEmployeeDto {
     @IsNotEmpty()
     readonly emergencyContactRelation:string;
 
-    @IsNotEmpty()
-    readonly currentStatus:string;
-
-    @IsNotEmpty()
-    readonly rejectReason:string;
-
-    @IsNotEmptyObject()
     readonly addressSet: Address[];
+
+    
 }

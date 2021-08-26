@@ -30,7 +30,7 @@ export class Employee{
     emailId:string;
 
     @Column({default:null})
-    dob:Date;
+    dob:string;
 
     @Column("decimal",{default:null})
     sslcScore:number;
@@ -65,8 +65,7 @@ export class Employee{
     @CreateDateColumn({ type: "timestamp", default: () => "CURRENT_TIMESTAMP(6)" })
     created_at: Date;
 
-    @OneToMany(type => Address, (address) => address.employee)
-    @JoinColumn()
+    @OneToMany(type => Address, (address) => address.employee,{cascade:['insert','update']})
     addressSet: Address[];
 
 

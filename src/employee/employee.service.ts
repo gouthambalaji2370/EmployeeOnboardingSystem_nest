@@ -1,5 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import e from 'express';
 import { AddressRepository } from 'src/address/address.repository';
 import { RoleRepository } from 'src/role/role.repository';
 import { UserRepository } from 'src/user/user.repository';
@@ -7,6 +6,7 @@ import { CreateEmployeeDto } from './dto/create-employee.dto';
 import { UpdateEmployeeDto } from './dto/update-employee.dto';
 import { UpdateStatusDto } from './dto/update-status.dto';
 import { EmployeeRepository } from './employee.repository';
+import { MailService } from 'src/mail/mail.service';
 import { Employee } from './entities/employee.entity';
 
 @Injectable()
@@ -17,6 +17,7 @@ export class EmployeeService {
     private roleRepository:RoleRepository,
     private userRepository:UserRepository,
     private addressRepository:AddressRepository,
+    private mailService:MailService
   ){
 
   }
@@ -44,19 +45,24 @@ else{
     return employee;
   }
 
+  async notifyEmployee(id:number){
+    let employee=await this.employeeRepository.findOne({where: {id: id}, relations: ['addressSet']})
+    await this.mailService.sendNotification(employee,'notify');
+    return 'success'
+  }
   async updateStatus(id:number,updateStatusDto:UpdateStatusDto){
     let employee=await this.employeeRepository.findOne({where: {id: id}, relations: ['addressSet']})
     if(updateStatusDto.action==='approve'){
       employee.currentStatus='COMPLETED'
+      await this.mailService.sendNotification(employee,'approve');
     }
     else if(updateStatusDto.action==='reject'){
       employee.currentStatus='REJECTED'
       employee.rejectReason=updateStatusDto.reason
+      await this.mailService.sendNotification(employee,'reject');
     }
     let data= await this.employeeRepository.save(employee);
     return 'success'
-
-
   }
   async update(id: number, updateEmployeeDto: UpdateEmployeeDto) {
     let name=updateEmployeeDto.firstName+" "+updateEmployeeDto.lastName;
@@ -89,12 +95,8 @@ else{
         update_object.currentStatus="incomplete"
       }
       let data= await this.employeeRepository.save(update_object);
-
-   
     let address1=  await this.addressRepository.save({type:updateEmployeeDto.addressSet[0].type,flatName:updateEmployeeDto.addressSet[0].flatName,street:updateEmployeeDto.addressSet[0].street,district:updateEmployeeDto.addressSet[0].district, area:updateEmployeeDto.addressSet[0].area,state:updateEmployeeDto.addressSet[0].state,country:updateEmployeeDto.addressSet[0].country,pincode:updateEmployeeDto.addressSet[0].pincode,mapCoordinates:updateEmployeeDto.addressSet[0].mapCoordinates,employee:data})
     let address2=  await this.addressRepository.save({type:updateEmployeeDto.addressSet[1].type,flatName:updateEmployeeDto.addressSet[1].flatName,street:updateEmployeeDto.addressSet[1].street,district:updateEmployeeDto.addressSet[1].district, area:updateEmployeeDto.addressSet[1].area,state:updateEmployeeDto.addressSet[1].state,country:updateEmployeeDto.addressSet[1].country,pincode:updateEmployeeDto.addressSet[1].pincode,mapCoordinates:updateEmployeeDto.addressSet[1].mapCoordinates,employee:data})
- 
-      
     return data;
   }
 

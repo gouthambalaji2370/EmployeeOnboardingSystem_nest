@@ -6,6 +6,7 @@ import { UserModule } from './user/user.module';
 import { EmployeeModule } from './employee/employee.module';
 import { AddressModule } from './address/address.module';
 import { RoleModule } from './role/role.module';
+import { MailModule } from './mail/mail.module';
 
 
 
@@ -26,6 +27,7 @@ import { RoleModule } from './role/role.module';
     EmployeeModule,
     AddressModule,
     RoleModule,
+    MailModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -35,4 +35,8 @@ export class EmployeeController {
   updateStatus(@Param('id')id:string,@Body() updateStatusDto:UpdateStatusDto){
     return this.employeeService.updateStatus(+id,updateStatusDto);
   }
+  @Post(':id/notification')
+  notifyEmployee(@Param('id')id:string){
+    return this.employeeService.notifyEmployee(+id);
+  }
 }

@@ -6,9 +6,10 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { RoleRepository } from '../role/role.repository';
 import { UserRepository } from '../user/user.repository';
 import { AddressRepository } from 'src/address/address.repository';
+import { MailModule } from 'src/mail/mail.module';
 
 @Module({
-  imports:[TypeOrmModule.forFeature([EmployeeRepository,RoleRepository,UserRepository,AddressRepository])],
+  imports:[TypeOrmModule.forFeature([EmployeeRepository,RoleRepository,UserRepository,AddressRepository]),MailModule],
   controllers: [EmployeeController],
   providers: [EmployeeService],
 })

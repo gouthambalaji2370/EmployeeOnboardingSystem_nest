@@ -37,18 +37,20 @@ else{
   }
 
  async findAll() {
-    return await this.employeeRepository.find({relations: ['addressSet']});
+    let data= await this.employeeRepository.find({relations: ['addressSet']});
+    return {'success':true,data:data};
+
   }
 
   async findOne(id: number) {
     let employee=await this.employeeRepository.findOne({where: {id: id}, relations: ['addressSet']})
-    return employee;
+    return {'success':true,data:employee};
   }
 
   async notifyEmployee(id:number){
     let employee=await this.employeeRepository.findOne({where: {id: id}, relations: ['addressSet']})
     await this.mailService.sendNotification(employee,'notify');
-    return 'success'
+    return {'success':true,message:'Employee Notified Successfully'};
   }
   async updateStatus(id:number,updateStatusDto:UpdateStatusDto){
     let employee=await this.employeeRepository.findOne({where: {id: id}, relations: ['addressSet']})
@@ -62,7 +64,8 @@ else{
       await this.mailService.sendNotification(employee,'reject');
     }
     let data= await this.employeeRepository.save(employee);
-    return 'success'
+    return {'success':true,message:'Employee Status updated Successfully'};
+
   }
   async update(id: number, updateEmployeeDto: UpdateEmployeeDto) {
     let name=updateEmployeeDto.firstName+" "+updateEmployeeDto.lastName;
@@ -97,7 +100,7 @@ else{
       let data= await this.employeeRepository.save(update_object);
     let address1=  await this.addressRepository.save({type:updateEmployeeDto.addressSet[0].type,flatName:updateEmployeeDto.addressSet[0].flatName,street:updateEmployeeDto.addressSet[0].street,district:updateEmployeeDto.addressSet[0].district, area:updateEmployeeDto.addressSet[0].area,state:updateEmployeeDto.addressSet[0].state,country:updateEmployeeDto.addressSet[0].country,pincode:updateEmployeeDto.addressSet[0].pincode,mapCoordinates:updateEmployeeDto.addressSet[0].mapCoordinates,employee:data})
     let address2=  await this.addressRepository.save({type:updateEmployeeDto.addressSet[1].type,flatName:updateEmployeeDto.addressSet[1].flatName,street:updateEmployeeDto.addressSet[1].street,district:updateEmployeeDto.addressSet[1].district, area:updateEmployeeDto.addressSet[1].area,state:updateEmployeeDto.addressSet[1].state,country:updateEmployeeDto.addressSet[1].country,pincode:updateEmployeeDto.addressSet[1].pincode,mapCoordinates:updateEmployeeDto.addressSet[1].mapCoordinates,employee:data})
-    return data;
+    return {'success':true,message:'Employee updated Successfully'};
   }
 
 }

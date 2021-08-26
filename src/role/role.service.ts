@@ -7,7 +7,8 @@ export class RoleService {
     ){
       }
  async findAll() {
-    return await this.roleRepository.findAllRoles();
+    let data= await this.roleRepository.findAllRoles();
+    return {'success':true,data:data};
   }
 
  async findOneByName(data:string) {

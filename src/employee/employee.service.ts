@@ -100,35 +100,51 @@ else{
     let name=updateEmployeeDto.firstName+" "+updateEmployeeDto.lastName;
     let code=id+1;
     let codeString=String(code);
-    let employee=await this.employeeRepository.findOne(id);
-    let update_object= {
-      id:id,
-      name:name,
-      phoneNumber:updateEmployeeDto.phoneNumber,
-      employeeCode:codeString,
-      aadharNumber:updateEmployeeDto.aadharNumber,
-      gender:updateEmployeeDto.gender,
-      dob:updateEmployeeDto.dob,
-      bloodGroup:updateEmployeeDto.bloodGroup,
-      sslcScore:updateEmployeeDto.sslcScore,
-      hscScore:updateEmployeeDto.hscScore,
-      ugScore:updateEmployeeDto.ugScore,
-      fatherName:updateEmployeeDto.fatherName,
-      motherName:updateEmployeeDto.motherName,
-      emergencyContactRelation:updateEmployeeDto.emergencyContactRelation,
-      emergencyContactName:updateEmployeeDto.emergencyContactName,
-      emergencyContactNumber:updateEmployeeDto.emergencyContactNumber,
-      rejectReason:null,
-      addressSet:updateEmployeeDto.addressSet,
-      currentStatus:""
+    let employee=await this.employeeRepository.findOne({where: {id: id}, relations: ['addressSet']});
+    if(employee.addressSet.length===0){
+      employee.addressSet=updateEmployeeDto.addressSet;
     }
+    else{
+      for(let i=0;i<2;i++){
+        if(employee.addressSet[i].type=updateEmployeeDto.addressSet[i].type){
+          employee.addressSet[i].id=updateEmployeeDto.addressSet[i].id;
+          employee.addressSet[i].flatName=updateEmployeeDto.addressSet[i].flatName
+          employee.addressSet[i].pincode=updateEmployeeDto.addressSet[i].pincode
+          employee.addressSet[i].street=updateEmployeeDto.addressSet[i].street
+          employee.addressSet[i].district=updateEmployeeDto.addressSet[i].district
+          employee.addressSet[i].state=updateEmployeeDto.addressSet[i].state
+          employee.addressSet[i].country=updateEmployeeDto.addressSet[i].country
+          employee.addressSet[i].mapCoordinates=updateEmployeeDto.addressSet[i].mapCoordinates
+          employee.addressSet[i].area=updateEmployeeDto.addressSet[i].area
+        }
+
+      }
+    
+    }
+    employee.name=name;
+    employee.phoneNumber=updateEmployeeDto.phoneNumber;
+    employee.employeeCode=codeString;
+    employee.aadharNumber=updateEmployeeDto.aadharNumber;
+    employee.gender=updateEmployeeDto.gender;
+    employee.dob=updateEmployeeDto.dob;
+    employee.bloodGroup=updateEmployeeDto.bloodGroup;
+    employee.sslcScore=updateEmployeeDto.sslcScore;
+    employee.hscScore=updateEmployeeDto.hscScore;
+    employee.ugScore=updateEmployeeDto.ugScore;
+    employee.fatherName=updateEmployeeDto.fatherName;
+    employee.motherName=updateEmployeeDto.motherName;
+    employee.emergencyContactRelation=updateEmployeeDto.emergencyContactRelation;
+    employee.emergencyContactName=updateEmployeeDto.emergencyContactName;
+    employee.emergencyContactNumber=updateEmployeeDto.emergencyContactNumber;
+
+   
     if(updateEmployeeDto.action==="submit"){
-      update_object.currentStatus="pending"
+      employee.currentStatus="pending"
         }
         else{
-          update_object.currentStatus="incomplete"
+          employee.currentStatus="incomplete"
         }
-        let data= await this.employeeRepository.save(update_object);
+        let data= await this.employeeRepository.save(employee);
     
 
         
